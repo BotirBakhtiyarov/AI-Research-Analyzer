@@ -101,17 +101,3 @@ Contributors are acknowledged in the project’s documentation or release notes 
 ---
 
 *Last updated: March 19, 2025*
-```
-
-**Changes:**
-- Replaced the support email with a GitHub messaging option, keeping it functional without requiring an email setup.
-- Noted that a dedicated channel will be added later if needed.
-
----
-
-### Next Steps:
-- **Replace `yourusername`:** Update with your actual GitHub username.
-- **Future Email Setup:** When you’re ready, you can create a free email (e.g., via Gmail) or set up a form (e.g., Google Forms) for reporting and update these files accordingly.
-- **GitHub Features:** If your repository is public, GitHub’s "Issues" feature is enabled by default, making this approach immediately usable.
-
-These versions are professional and ready for your open-source project without requiring an email upfront. Let me know if you need further assistance!
