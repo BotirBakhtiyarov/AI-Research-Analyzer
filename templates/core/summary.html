@@ -1,0 +1,236 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+{% load static %}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- PDF Viewer Column -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>{{ research.title }}</span>
+                    <a href="{{ research.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                        <i class="bi bi-download"></i> Download
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div id="pdf-viewer" style="height: 75vh; overflow-y: auto; position: relative;">
+                        <div class="pdf-loading text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading PDF...</span>
+                            </div>
+                            <p class="text-muted mt-2">Loading document...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Column -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Real-time Analysis</span>
+                    <div class="badge bg-{% if research.ai_probability > 0.7 %}danger{% else %}success{% endif %}">
+                        AI Probability: {{ research.ai_probability|floatformat:2 }}%
+                    </div>
+                </div>
+                <div class="card-body summary-container">
+                    <div id="summary" class="markdown-body"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Translation Popup -->
+<div id="translation-popup" class="translation-popup"></div>
+
+<!-- Required Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+
+<style>
+.markdown-body {
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 100%;
+    margin: 0;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.summary-container {
+    height: 75vh;
+    overflow-y: auto;
+}
+
+.translation-popup {
+    position: fixed;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-width: 300px;
+    display: none;
+    font-size: 14px;
+}
+
+.word-stream {
+    display: inline;
+    opacity: 0;
+    animation: wordAppear 0.3s ease forwards;
+}
+
+@keyframes wordAppear {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+    margin: 1em 0 0.5em;
+}
+
+.markdown-body strong {
+    font-weight: 600;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // PDF Viewer Initialization
+    const pdfViewer = document.getElementById('pdf-viewer');
+    const loadingElement = pdfViewer.querySelector('.pdf-loading');
+    const url = "{{ research.file.url }}";
+
+    pdfjsLib.getDocument(url).promise.then(pdfDoc => {
+        loadingElement.remove();
+
+        const renderPages = async () => {
+            for(let pageNumber = 1; pageNumber <= pdfDoc.numPages; pageNumber++) {
+                const page = await pdfDoc.getPage(pageNumber);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const wrapper = document.createElement('div');
+
+                wrapper.className = 'pdf-page';
+                canvas.className = 'pdf-canvas';
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                wrapper.appendChild(canvas);
+                pdfViewer.appendChild(wrapper);
+
+                const renderContext = {
+                    canvasContext: canvas.getContext('2d'),
+                    viewport: viewport
+                };
+
+                await page.render(renderContext).promise;
+            }
+        };
+
+        renderPages();
+    }).catch(error => {
+        loadingElement.innerHTML = `
+            <div class="alert alert-danger m-3">
+                Error loading PDF: ${error.message}<br>
+                <a href="${url}" class="alert-link">Download PDF</a>
+            </div>
+        `;
+    });
+
+    // Word streaming logic
+    const summaryDiv = document.getElementById('summary');
+    const eventSource = new EventSource("{% url 'core:stream-summary' research.id %}");
+    let lastChar = '';
+    const spaceNeededAfter = new Set([]);
+    const noSpaceBefore = new Set([',', '.', '!', '?', ';', ':']);
+
+    eventSource.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        let content = data.content;
+
+        // Add space after special characters
+        if (spaceNeededAfter.has(lastChar) && !content.startsWith(' ')) {
+            content = ' ' + content;
+        }
+
+        // Handle markdown formatting
+        const span = document.createElement('span');
+        span.className = 'word-stream';
+
+        // Add space between words
+        if (!noSpaceBefore.has(content[0]) && lastChar !== '' && lastChar !== ' ') {
+            span.textContent = ' ' + content;
+        } else {
+            span.textContent = content;
+        }
+
+        summaryDiv.appendChild(span);
+        lastChar = content.slice(-1);
+
+        // Auto-scroll
+        summaryDiv.scrollTop = summaryDiv.scrollHeight;
+
+        // Trigger animation
+        void span.offsetWidth;
+        span.style.opacity = '1';
+    };
+
+    eventSource.onerror = (e) => {
+        console.error('Stream error:', e);
+        eventSource.close();
+        summaryDiv.innerHTML += '<div class="alert alert-danger mt-2">Summary generation interrupted</div>';
+    };
+
+    // Translation Handling
+    const translationPopup = document.getElementById('translation-popup');
+
+    document.addEventListener('mouseup', async (e) => {
+        const selection = window.getSelection().toString().trim();
+        if (selection.length > 1) {
+            try {
+                const response = await fetch("{% url 'core:translate' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ text: selection })
+                });
+
+                const data = await response.json();
+                showTranslationPopup(data.translation);
+            } catch (error) {
+                console.error('Translation error:', error);
+            }
+        }
+    });
+
+    function showTranslationPopup(text) {
+        translationPopup.textContent = text;
+        translationPopup.style.display = 'block';
+        translationPopup.style.left = `${e.pageX + 15}px`;
+        translationPopup.style.top = `${e.pageY + 15}px`;
+
+        setTimeout(() => {
+            translationPopup.style.display = 'none';
+        }, 3000);
+    }
+});
+</script>
+
+{% endblock %}

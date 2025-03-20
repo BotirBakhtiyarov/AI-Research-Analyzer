@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Your Researches</h2>
+    <div>
+        <a href="{% url 'core:upload' %}" class="btn btn-success">
+            <i class="bi bi-upload"></i> Upload Research
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if researches %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>AI Probability</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for research in researches %}
+                    <tr>
+                        <td>{{ research.title }}</td>
+                        <td>{{ research.date|date:"Y-m-d" }}</td>
+                        <td>{{ research.ai_probability|floatformat:2 }}%</td>
+                        <td>
+                            <a href="{% url 'core:summarize' research.id %}" class="btn btn-sm btn-primary">
+                                View Summary
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="text-center py-5">
+                <h4>No researches uploaded yet</h4>
+                <p>Click the upload button to get started</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
