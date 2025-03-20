@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8+-yellow.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.1.7-green.svg)](https://www.djangoproject.com/)
+[![Latest Release](https://img.shields.io/github/v/release/BotirBakhtiyarov/AI-Research-Analyzer)](https://github.com/BotirBakhtiyarov/AI-Research-Analyzer/releases/latest)
 
 **Research Analyzer** is an open-source Django web application designed to streamline the process of uploading, analyzing, and summarizing research documents in PDF format. Leveraging AI technologies, it detects AI-generated content using a RoBERTa-based model and generates structured summaries with the DeepSeek API. This tool is ideal for researchers, students, and professionals who need to efficiently process and understand academic papers.
 
