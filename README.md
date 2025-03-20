@@ -160,4 +160,3 @@ For questions or suggestions, open an issue on GitHub or reach out to the mainta
 ---
 
 Happy researching! 🚀
-```
