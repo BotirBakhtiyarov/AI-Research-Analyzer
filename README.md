@@ -1,6 +1,3 @@
-Below is a professional and polished `README.md` file tailored for an open-source project on GitHub. It includes detailed sections for clarity, contribution guidelines, and a professional tone suitable for attracting contributors and users.
-
-```markdown
 # Research Analyzer
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
