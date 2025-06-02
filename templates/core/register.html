@@ -1,32 +1,32 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
+<div class="row justify-content-center mt-5">
+    <div class="col-12 col-md-4">
         <div class="card">
             <div class="card-header">Register</div>
             <div class="card-body">
-                <form method="post">
+                <form method="POST">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Full Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control" required>
+                        <input type="text" name="username" id="username" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" required>
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" id="email" class="form-control" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Register</button>
-                    <a href="{% url 'login' %}" class="btn btn-link">Already have an account?</a>
+                    <div class="mb-3">
+                        <label for="password1" class="form-label">Password</label>
+                        <input type="password" name="password1" id="password1" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password2" class="form-label">Confirm Password</label>
+                        <input type="password" name="password2" id="password2" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
                 </form>
+                <p class="mt-3 text-center">Already have an account? <a href="{% url 'login' %}">Login</a></p>
             </div>
         </div>
     </div>

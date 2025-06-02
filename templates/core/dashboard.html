@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Your Researches</h2>
     <div>
         <a href="{% url 'core:upload' %}" class="btn btn-success">
@@ -10,39 +10,34 @@
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        {% if researches %}
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Date</th>
-                        <th>AI Probability</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for research in researches %}
-                    <tr>
-                        <td>{{ research.title }}</td>
-                        <td>{{ research.date|date:"Y-m-d" }}</td>
-                        <td>{{ research.ai_probability|floatformat:2 }}%</td>
-                        <td>
-                            <a href="{% url 'core:summarize' research.id %}" class="btn btn-sm btn-primary">
-                                View Summary
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <div class="text-center py-5">
-                <h4>No researches uploaded yet</h4>
-                <p>Click the upload button to get started</p>
+<div class="row">
+    {% for research in researches %}
+    <div class="col-12 col-md-4 mb-3">
+        <div class="card h-100 shadow-sm">
+            <img src="{% static 'images/pdf-placeholder.png' %}" class="card-img-top" alt="PDF Thumbnail">
+            <div class="card-body">
+                <h5 class="card-title">{{ research.title }}</h5>
+                <p class="card-text">Date: {{ research.date|date:"Y-m-d" }}</p>
+                <p class="card-text">AI: {{ research.ai_probability|floatformat:2 }}%</p>
+                <a href="{% url 'core:summarize' research.id %}" class="btn btn-primary">View Summary</a>
             </div>
-        {% endif %}
+        </div>
     </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted">No researches uploaded yet. <a href="{% url 'core:upload' %}">Upload one now</a>.</p>
+    </div>
+    {% endfor %}
 </div>
+
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+    }
+    .card-img-top {
+        height: 150px;
+        object-fit: cover;
+    }
+</style>
 {% endblock %}
